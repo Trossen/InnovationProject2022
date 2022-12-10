@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import List
+from datetime import time
 @dataclass
 class Event:
     title: str
@@ -64,10 +65,19 @@ class Week:
     def getName(self):
         return self.name
 
-
 @dataclass
-class Calendar:
-    weeks: List[Week]
+class User:
+    userCalendar: List[Week]
+    goToWorkTime: time
 
-    def getWeeks (self):
-        return self.weeks
+    def getCalendar(self):
+        return self.userCalendar
+    
+    def getTime(self):
+        return self.goToWorkTime
+
+    def setCalendar(self,userCalendar):
+        self.userCalendar = userCalendar
+    
+    def setTime(self, goToWorkTime):
+        self.goToWorkTime = goToWorkTime
