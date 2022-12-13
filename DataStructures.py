@@ -5,8 +5,7 @@ from datetime import time
 class Event:
     title: str
     time: int
-    #priority: int #index of list in DailyEvents instead?
-    #weekday: List[bool]
+    travel : bool = False
 
     # GETTERS
     def getTitle(self):
@@ -15,11 +14,8 @@ class Event:
     def getTime(self):
         return self.time
 
-    #def getPriority(self):
-    #    return self.priority
-
-    #def getWeekday(self):
-    #    return self.weekday
+    def getTravel(self):
+        return self.travel
 
     # SETTERS
     def setTitle(self,title):
@@ -27,21 +23,13 @@ class Event:
 
     def setTime (self,time):
         self.time = time
-
-    #def setPriority(self,priority):
-    #    self.priority = priority
-
-    #def setWeekday (self,weekday):
-    #    self.weekday = weekday
-
-    # Change priority
     
 @dataclass
 class Day:
     name: str
     events: List[Event]
 
-    def insertEvent(self,index,newEvent): #which index should be chosen?
+    def insertEvent(self,index,newEvent):
         self.events.insert(index,newEvent)
 
     def getEvents(self):

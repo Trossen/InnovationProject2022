@@ -10,7 +10,7 @@ from datetime import date
 localUser = User([],None)
 weekdays = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
 
-#DONE
+
 def formatTime(eventTime):
     printTime = (localUser.getTime().hour,localUser.getTime().minute)
     if eventTime > localUser.getTime().minute:
@@ -22,7 +22,6 @@ def formatTime(eventTime):
     else:
         return str(printTime[0]) + ":" + str(printTime[1])
 
-#SOMEWHAT DONE
 def settings():
     userInput = 1
     while userInput > 0 and userInput < 6:
@@ -51,45 +50,87 @@ def settings():
         if userInput == 5:
             print("Bruh there are way too many print statements, i dont wanna support multiple languages\n")
 
-#DONE
-def addEvent():
-    print("To create a new event, please answer the following questions:\n")
-    newEventTitle = input("What is the title of the new event?:")
-    newEventTime = int(input("How long does the new event take?:"))
-    oneTime = input("Is this event a one time event? y/n:")
-    if oneTime == "y":
-        weekNum = int(input("Which week does the event occur?:"))
-        weekDay = input("Which weekday does the event occur?:")
-        print(str(weekdays.index(weekDay)))
-        localUser.getCalendar()[weekNum-1].getDays()[weekdays.index(weekDay)].getEvents().append(Event(newEventTitle,newEventTime))
-        print("There should now be an event in week "+str(weekNum)+" on "+ weekDay +"\n")
-        dummy = input(("One time event successfully created! Press enter to return to main menu"))
-    else:
-        monIncl = input("Does the event occur every monday? y/n:")
-        tueIncl = input("Does the event occur every tuesday? y/n:")
-        wedIncl = input("Does the event occur every wednesday? y/n:")
-        thuIncl = input("Does the event occur every thursday? y/n:")
-        friIncl = input("Does the event occur every friday? y/n:")
-        satIncl = input("Does the event occur every saturday? y/n:")
-        sunIncl = input("Does the event occur every sunday? y/n:")
-        for weeks in range(len(localUser.getCalendar())):
-            for day in range(len(weekdays)):
-                localUser.getCalendar()[weeks].getDays()[day].getEvents().append(Event(newEventTitle,newEventTime))
-        dummy = input(("Recurring event successfully created! Press enter to return to main menu"))
+def choosePriority(weekNum,weekDay):
+    print("\nChoose when the event should happen on " + weekDay + " in week " + str(weekNum) + ":\n")
+    counter = 0
+    print(" " + str(counter))
+    for event in localUser.getCalendar()[weekNum-1].getDays()[weekdays.index(weekDay)].getEvents():
+        if event.getTitle() != "Go to work/school":
+            print(" - " + event.getTitle())
+            counter = counter + 1
+            print(" " + str(counter))
+    chosenIndex = int(input("Please enter the number where the new event should be: "))
+    while chosenIndex < 0 or chosenIndex > counter:
+        chosenIndex = int(input("Please choose a valid number: "))
+    return chosenIndex
 
-#DONE
+def addEvent():
+
+    print("To create a new event, please answer the following questions:\n")
+    newEventTitle = input("What is the title of the new event?: ")
+    newEventTime = int(input("How long does the new event take?: "))
+    weekNum = int(input("Which week does the event occur?: "))
+
+
+    multipleWeekdays = input("Does the event occur on multiple weekdays?: y/n ")
+    if multipleWeekdays == "n":
+        weekDay = input("Which weekday does the event occur?: ")
+    else:
+        weekDays = input("Which days should the event occur on?: write a text consisting of y or n if you want to include the weekday or not eg. ynynynn: ")
+    
+
+    repeat = input("Should this event be repeated? y/n: ")
+
+    # --- CASE NO REPEAT ---
+    if repeat == "n":
+        if multipleWeekdays == "n":
+            localUser.getCalendar()[weekNum-1].getDays()[weekdays.index(weekDay)].insertEvent(choosePriority(weekNum,weekDay),Event(newEventTitle,newEventTime))
+            print("There should now be an event in week " + str(weekNum) + " on " + weekDay +"\n")
+        else:
+            counter = 0
+            for char in weekDays:
+                if char == "y":
+                    localUser.getCalendar()[weekNum-1].getDays()[counter].insertEvent(choosePriority(weekNum,weekdays[counter]),Event(newEventTitle,newEventTime))
+                counter = counter + 1
+            print("There should now be events in week "+str(weekNum)+"!\n")
+        dummy = input(("Non repeating event(s) successfully created! Press enter to return"))
+    
+    # --- CASE REPEAT ---
+    else:
+        repeatNum = int(input("How many times should the event be repeated excluding the first one?: ")) + 1
+        if multipleWeekdays == "n":
+            for number in range(repeatNum):
+                if weekNum + number < len(localUser.getCalendar()):
+                    localUser.getCalendar()[weekNum + number - 1].getDays()[weekdays.index(weekDay)].insertEvent(choosePriority(weekNum + number,weekDay),Event(newEventTitle,newEventTime))
+        else:
+            for number in range(repeatNum):
+                counter = 0
+                if weekNum + number < len(localUser.getCalendar()):
+                    for char in weekDays:
+                        if char == "y":
+                            localUser.getCalendar()[weekNum + number - 1].getDays()[counter].insertEvent(choosePriority(weekNum + number,weekdays[counter]),Event(newEventTitle,newEventTime))
+                        counter = counter + 1
+        dummy = input(("Recurring event successfully created! Press enter to return"))
+
+def calculateTime(event):
+    if not event.getTravel():
+        return event.getTime()
+    else:
+        #--------------------------------------------------------------
+        #Insert fancy math to adjust travel time according to wind here
+        #--------------------------------------------------------------
+        return event.getTime()
+
 def dayCalendar(weekNum,weekDayNum):
     print("Showing routine for " + weekdays[weekDayNum-1] + " in week " + str(weekNum) + "\n")
-    print("This is your morning routine for today:\n")
     offset = 0
     for event in localUser.getCalendar()[weekNum-1].getDays()[weekDayNum-1].getEvents():
-        offset = offset + event.getTime()
+        offset = offset + calculateTime(event)
     for event in localUser.getCalendar()[weekNum-1].getDays()[weekDayNum-1].getEvents():
-        print(event.getTitle() +"      "+ formatTime(offset) +"\n")
-        offset = offset - event.getTime()
-    dummy = input("To go back to the menu press enter.\n")
+        print(formatTime(offset) + "   " + event.getTitle())
+        offset = offset - calculateTime(event)
+    dummy = input("\nTo go back to the menu press enter.\n")
 
-#DONE
 def weekCalendar(weekNum):
     userInput = ""
     while userInput != "back":
@@ -101,20 +142,24 @@ def weekCalendar(weekNum):
             if userInput == dayName:
                 dayCalendar(weekNum+1,weekdays.index(dayName)+1)
 
-#DONE
 def yearCalendar():
     userInput = 1
-    while userInput != 0:
+    while userInput != "back":
         print("\nThis is your week calendar\n")
         for week in localUser.getCalendar():
             print(week.getName() + "\n")
-        userInput = int(input("To see the days of a week, enter the number of the week you would like to see, to go back to the menu enter 0\n"))
-        for weekNum in range(len(localUser.getCalendar())):
-            if userInput == weekNum+1:
-                weekCalendar(weekNum)
+        userInput = input("To see the days of a week, enter the number of the week you would like to see, to go back to the menu enter back\n")
+        if userInput.isnumeric():
+            for weekNum in range(len(localUser.getCalendar())):
+                if int(userInput) == weekNum + 1:
+                    weekCalendar(weekNum)
 
-#DONE
 def main():
+
+    # Pull todays date
+    # If raining, insert an event with get rainjacket to todays routine.
+    # If dark, insert an event with get bikelights to todays routine.
+
     userInput = 1
     while userInput > 0 and userInput < 5:
         print("This is the main menu, you can by pressing the corresponding number:\n")
@@ -134,33 +179,28 @@ def main():
             addEvent()   
     print("Goodbye!\n")
 
-#DONE
 def questionnaire():
-    numberOfEvents = 0
-    print("Welcome to the Morning Butler!\n Please fill out the questionnaire")
-    brushTeeth = input("Do you brush teeth, y/n?:")
+    print("\nPlease fill out the questionnaire.\n")
+    brushTeeth = "y" #input("Do you brush teeth, y/n?:")
     if brushTeeth == "y":
-        numberOfEvents = numberOfEvents + 1
-        timeBt = int(input("How long does it take to brush teeth in whole minutes?:"))
-    eatBreakfast = input("Do you eat breakfast, y/n?: ")
+        timeBt = 4 #int(input("How long does it take to brush teeth in whole minutes?:"))
+    eatBreakfast = "y" #input("Do you eat breakfast, y/n?: ")
     if eatBreakfast == "y":
-        numberOfEvents = numberOfEvents + 1
-        mondayBf = input("Do you eat breakfast Monday, y/n?: ")
-        tuesdayBf = input("Do you eat breakfast Tuesday, y/n?: ")
-        wednesdayBf = input("Do you eat breakfast Wednesday, y/n?: ")
-        thursdayBf = input("Do you eat breakfast Thursday, y/n?: ")
-        fridayBf = input("Do you eat breakfast Friday, y/n?: ")
-        saturdayBf = input("Do you eat breakfast Saturday, y/n?: ")
-        sundayBf = input("Do you eat breakfast Sunday, y/n?: ")
+        mondayBf = "y"#input("Do you eat breakfast Monday, y/n?: ")
+        tuesdayBf = "y"#input("Do you eat breakfast Tuesday, y/n?: ")
+        wednesdayBf = "y"#input("Do you eat breakfast Wednesday, y/n?: ")
+        thursdayBf = "y"#input("Do you eat breakfast Thursday, y/n?: ")
+        fridayBf = "y"#input("Do you eat breakfast Friday, y/n?: ")
+        saturdayBf = "y"#input("Do you eat breakfast Saturday, y/n?: ")
+        sundayBf = "y"#input("Do you eat breakfast Sunday, y/n?: ")
         bfList = [mondayBf,tuesdayBf,wednesdayBf,thursdayBf,fridayBf,saturdayBf,sundayBf]
-        timeBf = int(input("How long does it take to eat breakfast in whole minutes?: "))
-    howManyWeeks = int(input("How many weeks do you want to set up for?: "))
+        timeBf = 20 #int(input("How long does it take to eat breakfast in whole minutes?: "))
+    howManyWeeks = 52 #int(input("How many weeks do you want to set up for?: "))
 
-    goToWork = input("When do meet for work/school?: please follow the format XX:XX:XX:\n")
-    timeWork = int(input("How long does it usually take to go to work/school in minutes?: "))
+    goToWork = "09:00:00"#input("When do meet for work/school?: please follow the format XX:XX:XX:\n")
+    timeWork = 15#int(input("How long does it usually take to go to work/school in minutes?: "))
     localUser.setTime(datetime.time.fromisoformat(goToWork))
 
-    print("\n   ------------ Creating Calendar ------------   \n")
     # make every week
     for weeks in range(howManyWeeks):
         localUser.getCalendar().append(Week("Week " + str(weeks+1),[]))
@@ -173,14 +213,13 @@ def questionnaire():
             if eatBreakfast == "y":
                 if bfList[day] == "y":
                     localUser.getCalendar()[weeks].getDays()[day].getEvents().append(Event("Breakfast",timeBf))
-            localUser.getCalendar()[weeks].getDays()[day].getEvents().append(Event("Go to work/school",timeWork))
-
-                
-
-    print("\nCalendar created Succesfully!\n")
+            localUser.getCalendar()[weeks].getDays()[day].getEvents().append(Event("Go to work/school",timeWork,True))
+    
+    addAnother = input("Would you like to add extra events? y/n\n")
+    while addAnother != "n":
+        addEvent()
+        addAnother = input("Would you like to add extra events? y/n\n")
     main()
 
 questionnaire()
-
-
 
