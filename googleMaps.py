@@ -114,3 +114,12 @@ else:
   print("Headwind")
 
 #Få Solopgang og solnedgang
+import datetime
+sunrise = datetime.datetime.fromtimestamp(data['sys']['sunrise'])
+sunset = datetime.datetime.fromtimestamp(data['sys']['sunset'])
+
+
+print('Sunrise:', sunrise)
+print('Sunset:', sunset)
+
+#Mulgivis vind hastighed udregning ting
