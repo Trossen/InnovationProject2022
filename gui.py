@@ -19,16 +19,19 @@ frame_days = Frame(window)
 frame_tasks = Frame(window)
 frame_bottom = Frame(window)
 frame_top = Frame(window)
+frame_defaultQ = Frame(window)
 
 allDays = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
-listOfQ = ["Spiser du morgenmad?", "Børste du tænder?"]
+listOfQ = ["Spiser du morgenmad?", "Børste du tænder?"] ## Fyldes ud med spørgsmål
+
 # (Title :: str, DoingEvent :: Bool, Minutes :: Int, Weekdays :: [Int])  -- Weekdays has 1 or 0 for happening/not happening
 qAnswers = [() for i in listOfQ]
 # (Title :: str, Minutes :: Int, Weekdays :: [Int], Repeat :: Bool, RepeatNr :: Int)
 listOfAddEvents = []
+commuteList = [""] * 4
 
 for frame in (frame_menu, frame_settings, frame_addevent, frame_questionnaire, frame_questionnaire_done,
-                frame_weeks, frame_days, frame_tasks, frame_home):
+                frame_weeks, frame_days, frame_tasks, frame_home, frame_defaultQ):
     frame.grid(row=1,column=0,sticky="nsew")
 
 frame_top.grid(row=0,column=0,sticky='n')
@@ -200,8 +203,8 @@ def open_settings():
 
     # Buttons:
     # Kan laves som loop for ukendt antal, ellers bare stik to hardcode, måske med 7?
-    btn1 = Button(frame_settings, text="Repeat Questionnaire",height=3, width=30,
-                    command=lambda:questionnaire(listOfQ, 0)).grid(row='1',column='1', pady=8, padx=20)
+    btn1 = Button(frame_settings, text="Take questionnaire",height=3, width=30,
+                    command=lambda:open_defaultQ()).grid(row='1',column='1', pady=8, padx=20)
     btn2 = Button(frame_settings, text="Language",height=3, width=30).grid(row='2',column='1', padx=20)
     btn3 = Button(frame_settings, text="Ring Tone",height=3, width=30).grid(row='3',column='1', pady=8, padx=20)
     btn4 = Button(frame_settings, text="Terms of service",height=3, width=30).grid(row='4',column='1', padx=20)
@@ -214,6 +217,7 @@ def open_settings():
 ######################### FRAMES: QUESTIONNAIRES ###############################
 ################################################################################
 def questionnaire(qList, currentQ):
+    print(commuteList)
     for widgets in frame_questionnaire.winfo_children():
         widgets.destroy()
     show_frame(frame_questionnaire)
@@ -350,6 +354,39 @@ def open_addevent():
                                     repeat.get(), getRepeatNr.get()))
         open_home()
     
+def open_defaultQ():
+    show_frame(frame_defaultQ)
+    label_top_q = Label(frame_defaultQ, text="Commute questions").grid(row=0,column=0, columnspan=10)
+
+    # Address
+    Label(frame_defaultQ, text="Please enter following addresses:").grid(row=1,column=0, columnspan=10)
+    Label(frame_defaultQ, text="Eg: Exampleroad 1, 9999 Exampletown").grid(row=1,column=0, columnspan=10)
+    Label(frame_defaultQ, text="Home:").grid(row=2,column=0, sticky='w')
+    home = Entry(frame_defaultQ, width=30)
+    home.grid(row=2,column=1, sticky='e', padx=10)
+    label_title = Label(frame_defaultQ, text="Work:").grid(row=3,column=0, sticky='w')
+    work = Entry(frame_defaultQ, width=30)
+    work.grid(row=3,column=1, sticky='e', padx=10)
+    Label(frame_defaultQ, text="Type of transportation?").grid(row=4,column=0, columnspan=10)
+    transport = StringVar()
+    Radiobutton(frame_defaultQ, text="Driving (car)", variable=transport, value="driving").grid(row=5,column=1, sticky='w', padx=20)
+    Radiobutton(frame_defaultQ, text="Transit (Bus/Train)", variable=transport, value="transit").grid(row=6,column=1, sticky='w', padx=20)
+    Radiobutton(frame_defaultQ, text="Walking", variable=transport, value="walking").grid(row=7,column=1, sticky='w', padx=20)
+    Radiobutton(frame_defaultQ, text="Bicycling", variable=transport, value="bicycling").grid(row=8,column=1, sticky='w', padx=20)
+    Label(frame_defaultQ, text="Meeting time at work/school?").grid(row=9,column=0, columnspan=10)
+    Label(frame_defaultQ, text="Eg: 09:00:00").grid(row=10,column=0, columnspan=10)
+    time = Entry(frame_defaultQ, width=12)
+    time.grid(row=11,column=0,columnspan=4)
+
+    Button(frame_defaultQ, text="Next / Done", command=lambda:getVariables()
+            ).grid(row=12,column=0,sticky='e',columnspan=10, padx=10)
+
+    def getVariables():
+        commuteList[0] = home.get()
+        commuteList[1] = work.get()
+        commuteList[2] = transport.get()
+        commuteList[3] = time.get()
+        questionnaire(listOfQ, 0)
 
 # First frame to be shown
 open_home()
