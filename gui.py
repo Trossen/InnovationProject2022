@@ -34,7 +34,6 @@ for frame in (frame_menu, frame_settings, frame_addevent, frame_questionnaire, f
 frame_top.grid(row=0,column=0,sticky='n')
 frame_bottom.grid(row=100,column=0,sticky='s')
 
-
 def printAddEvent():
     for i in listOfAddEvents:
         print(i)
@@ -42,7 +41,7 @@ def printAddEvent():
 ############################## TOP FRAME #######################################
 def open_topframe(title):
     show_frame(frame_top)
-    label1 = Label(frame_top, text="Week 42, Monday 10:32", width=30, anchor='e').grid(row=0,column=0,padx=20)
+    label1 = Label(frame_top, text=title, width=30, anchor='e').grid(row=0,column=0,padx=20)
     Button(frame_top, text="Today", height=1, width=10,
             command=lambda:open_home()
             ).grid(row=0,column=0, sticky='w', padx=20)
@@ -50,45 +49,46 @@ def open_topframe(title):
 ############################# BOTTOM FRAME #####################################
 # Settings button
 Button(frame_bottom, text="Settings",height=3, width=9,
-            command=lambda:open_settings()
-            ).grid(row='100',column='0', sticky='w')
+        command=lambda:open_settings()
+        ).grid(row='100',column='0', sticky='w')
 # Menu button
 Button(frame_bottom, text="Weekview",height=3, width=9,
-            command=lambda:open_weeks(50)
-            ).grid(row='100',column='1')
+        command=lambda:open_weeks(50)
+        ).grid(row='100',column='1')
 # Add Event button
 Button(frame_bottom, text="+",height=3, width=9,
-            command=lambda:open_addevent()
-            ).grid(row='100',column='2', sticky='e')
+        command=lambda:open_addevent()
+        ).grid(row='100',column='2', sticky='e')
 
 ########################### BOTTOM BUTTONS #####################################
-def bottom_buttons(curFrame):
-    # Today button
-    Button(curFrame, text="Today", height=1, width=5,
-            command=lambda:open_home()
-            ).grid(row=0,column=1, sticky='w', padx=20)
+# def bottom_buttons(curFrame):
+#     # Today button
+#     Button(curFrame, text="Today", height=1, width=5,
+#             command=lambda:open_home()
+#             ).grid(row=0,column=1, sticky='w', padx=20)
 
-    # Settings button
-    btn5 = Button(curFrame, text="Settings",height=3, width=9,
-                    command=lambda:open_settings()
-                    ).grid(row='100',column='1', sticky='w', padx=20)
-    # Menu button
-    btn5 = Button(curFrame, text="Weekview",height=3, width=9,
-                    command=lambda:open_weeks(50)
-                    ).grid(row='100',column='1')
-    # Add Event button
-    btn5 = Button(curFrame, text="+",height=3, width=9,
-                    command=lambda:open_addevent()
-                    ).grid(row='100',column='1', sticky='e', padx=20)
+#     # Settings button
+#     btn5 = Button(curFrame, text="Settings",height=3, width=9,
+#                     command=lambda:open_settings()
+#                     ).grid(row='100',column='1', sticky='w', padx=20)
+#     # Menu button
+#     btn5 = Button(curFrame, text="Weekview",height=3, width=9,
+#                     command=lambda:open_weeks(50)
+#                     ).grid(row='100',column='1')
+#     # Add Event button
+#     btn5 = Button(curFrame, text="+",height=3, width=9,
+#                     command=lambda:open_addevent()
+#                     ).grid(row='100',column='1', sticky='e', padx=20)
 
 ################################################################################
 ############################## FRAME: HOME #####################################
 ################################################################################
 def open_home():
     show_frame(frame_home)
+    open_topframe("Home")
     
     # Frame Title:
-    # label1 = Label(frame_home, text="Dato, Week, Tidspunkt").grid(row='0',column='1')
+    label1 = Label(frame_home, text="Dato, Week, Tidspunkt").grid(row='0',column='1')
 
     # Buttons:
     # Kan laves som loop for ukendt antal, ellers bare stik to hardcode, måske med 7?
@@ -97,14 +97,12 @@ def open_home():
     btn3 = Label(frame_home, text="dø version 2",height=2, width=30,relief=GROOVE).grid(row='3',column='1', pady=8, padx=20)
     btn4 = Label(frame_home, text="Børst tænder",height=2, width=30,relief=GROOVE).grid(row='4',column='1', padx=20)
     btn5 = Label(frame_home, text="Rid på job",height=2, width=30,relief=GROOVE).grid(row='5',column='1', pady=8, padx=20)
-    btn5 = Label(frame_home, text="Rid på job",height=2, width=30,relief=GROOVE).grid(row='6',column='1', pady=8, padx=20)
-    btn5 = Label(frame_home, text="Rid på job",height=2, width=30,relief=GROOVE).grid(row='7',column='1', pady=8, padx=20)
-    btn5 = Label(frame_home, text="Rid på job",height=2, width=30,relief=GROOVE).grid(row='8',column='1', pady=8, padx=20)
-    btn5 = Label(frame_home, text="Rid på job",height=2, width=30,relief=GROOVE).grid(row='9',column='1', pady=8, padx=20)
-    btn5 = Label(frame_home, text="Rid på job",height=2, width=30,relief=GROOVE).grid(row='10',column='1', pady=8, padx=20)
+    # btn5 = Label(frame_home, text="Rid på job",height=2, width=30,relief=GROOVE).grid(row='6',column='1', pady=8, padx=20)
+    # btn5 = Label(frame_home, text="Rid på job",height=2, width=30,relief=GROOVE).grid(row='7',column='1', pady=8, padx=20)
+    # btn5 = Label(frame_home, text="Rid på job",height=2, width=30,relief=GROOVE).grid(row='8',column='1', pady=8, padx=20)
+    # btn5 = Label(frame_home, text="Rid på job",height=2, width=30,relief=GROOVE).grid(row='9',column='1', pady=8, padx=20)
+    # btn5 = Label(frame_home, text="Rid på job",height=2, width=30,relief=GROOVE).grid(row='10',column='1', pady=8, padx=20)
 
-    open_topframe("Home")
-    show_frame(frame_bottom)
 
     # Bottom buttons:
     # bottom_buttons(frame_home)
@@ -133,7 +131,7 @@ def open_weeks(week):
     btn5 = Button(frame_weeks, text="Week: " + weekNr(week+4),height=3, width=30, command=lambda:open_days(week+4)).grid(row='5',column='1', pady=8, padx=20)
 
     # Bottom buttons:
-    bottom_buttons(frame_weeks)
+    # bottom_buttons(frame_weeks)
 
 ################################################################################
 ############################### FRAME: DAYS ####################################
@@ -153,7 +151,7 @@ def open_days(week):
     btn5 = Button(frame_days, text=allDays[4],height=3, width=30).grid(row='5',column='1', pady=8, padx=20)
 
     # Bottom buttons:
-    bottom_buttons(frame_days)
+    # bottom_buttons(frame_days)
 
 ################################################################################
 ############################### FRAME: TASKS ####################################
@@ -173,7 +171,7 @@ def open_tasks():
     btn5 = Button(frame_tasks, text=allDays[4],height=3, width=30).grid(row='5',column='1', pady=8, padx=20)
 
     # Bottom buttons:
-    bottom_buttons(frame_tasks)
+    # bottom_buttons(frame_tasks)
 
 ##### ???????????????????????????????? Skal laves om til tasks overview
 def open_frame(curFrame, frameTitle, listOfStr):
@@ -190,7 +188,7 @@ def open_frame(curFrame, frameTitle, listOfStr):
     btn5 = Button(curFrame, text=listOfStr[4],height=3, width=30).grid(row='5',column='1', pady=8, padx=20)
 
     # Bottom buttons:
-    bottom_buttons(curFrame)
+    # bottom_buttons(curFrame)
 
 ################################################################################
 ########################### FRAME: SETTINGS ####################################
@@ -210,7 +208,7 @@ def open_settings():
     btn5 = Button(frame_settings, text="Delete everything",height=3, width=30).grid(row='5',column='1', pady=8, padx=20)
 
     # Bottom buttons:
-    bottom_buttons(frame_settings)
+    # bottom_buttons(frame_settings)
 
 ################################################################################
 ######################### FRAMES: QUESTIONNAIRES ###############################
@@ -274,12 +272,15 @@ def questionnaire(qList, currentQ):
 def questionnaireDone():
     show_frame(frame_questionnaire_done)
     label_top_q = Label(frame_questionnaire_done, text="Questionnaire").grid(row=0,column=0, columnspan=10)
-    Label(frame_questionnaire_done).grid(row=1,column=1)
-    l_completed = Label(frame_questionnaire_done, width=40, text="You succesfully completed the questionnaire!"
-                        ).grid(row=2,column=1)
-    Label(frame_questionnaire_done).grid(row=3,column=1)
+    Label(frame_questionnaire_done).grid(row=1,column=0)
+    l_completed = Label(frame_questionnaire_done, width=35, text="You succesfully completed"
+                        ).grid(row=2,column=0, columnspan=10)
+    l_completed = Label(frame_questionnaire_done, width=35, text="the questionnaire!"
+                        ).grid(row=3,column=0, columnspan=10)
+    Label(frame_questionnaire_done).grid(row=4,column=1)
+    
     # Button(frame_questionnaire_done, text="print values",command=lambda:printstuff()).grid(row=4)
-    bottom_buttons(frame_questionnaire_done)
+    # bottom_buttons(frame_questionnaire_done)
 
 # Used in questionnaireDone to print all lists of tuples
 def printstuff():
@@ -348,21 +349,6 @@ def open_addevent():
         listOfAddEvents.append((getTitle.get(), getMinutes.get(), [d1.get(),d2.get(),d3.get(),d4.get(),d5.get(),d6.get(),d7.get()],
                                     repeat.get(), getRepeatNr.get()))
         open_home()
-        
-    # Bottom buttons:
-    # Settings button
-    btn5 = Button(frame_addevent, text="Settings",height=3, width=9,
-                    command=lambda:open_settings()
-                    ).grid(row=100,column=0, columnspan=10, sticky='w')
-    # Menu button
-    btn5 = Button(frame_addevent, text="Weekview",height=3, width=9,
-                    command=lambda:open_home()
-                    ).grid(row=100,column=0, columnspan=10)
-    # Add Event button
-    btn5 = Button(frame_addevent, text="+",height=3, width=9,
-                    command=lambda:open_addevent()
-                    ).grid(row=100, column=0, columnspan=10, sticky='e')
-
     
 
 # First frame to be shown
