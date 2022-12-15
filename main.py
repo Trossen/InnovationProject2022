@@ -219,7 +219,6 @@ def isRaining(weatherCall):
     if weatherCode < 700:
         return True
 
-
 def main():
     # API REQUESTS
     geoHome = requests.get("https://maps.googleapis.com/maps/api/geocode/json?address=" + localUser.getHomeAddress() + "&key=" + google_api_key)
