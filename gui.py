@@ -1,4 +1,20 @@
 from tkinter import *
+#Self written datastructures
+from DataStructures import *
+#For retaking the questionnaire
+import os 
+import sys 
+import subprocess
+#For time
+import datetime
+from datetime import date
+#for API requests
+import requests
+#for calculating coordinates
+import math
+google_api_key = 'AIzaSyDdOaN1K1GMwjxLv_x3EScqzWnJvyS-XTc'
+openweathermap_api_key = 'b59487c37a2da0337444936e64b3cac9'
+localUser = User([],None,None,None,None)
 
 def show_frame(frame):
     frame.tkraise()
@@ -22,8 +38,8 @@ frame_top = Frame(window)
 frame_defaultQ = Frame(window)
 
 allDays = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
-listOfQ = ["Spiser du morgenmad?", "Børste du tænder?"] ## Fyldes ud med spørgsmål
-
+listOfQ = ["Spiser du morgenmad?", "Børste du tænder?"]
+listofEventTitles = ["Morgenmad","Børst tænder"]
 # (Title :: str, DoingEvent :: Bool, Minutes :: Int, Weekdays :: [Int])  -- Weekdays has 1 or 0 for happening/not happening
 qAnswers = [() for i in listOfQ]
 # (Title :: str, Minutes :: Int, Weekdays :: [Int], Repeat :: Bool, RepeatNr :: Int)
@@ -266,7 +282,7 @@ def questionnaire(qList, currentQ):
     
     # Inner function to grab all the entered data, before next question is shown.
     def getVariables():
-        qAnswers[currentQ] = (qList[currentQ], doingEvent.get(), getMinutes.get(
+        qAnswers[currentQ] = (listofEventTitles[currentQ], doingEvent.get(), getMinutes.get(
                                 ), [d1.get(),d2.get(),d3.get(),d4.get(),d5.get(),d6.get(),d7.get()])
         questionnaire(qList,currentQ+1)
 
@@ -274,6 +290,24 @@ def questionnaire(qList, currentQ):
 ########################### FRAME: QUESTIONNAIRE DONE ##########################
 ################################################################################
 def questionnaireDone():
+    #Make an empty calendar
+    for weeks in range(52):
+        localUser.getCalendar().append(Week("Week " + str(weeks+1),[]))
+        # make every day
+        for day in range(len(allDays)):
+            localUser.getCalendar()[weeks].getDays().append(Day(allDays[day],[]))
+    #Add events
+    for answer in qAnswers:
+        #If they are doing the event
+        if answer[1]:
+            for weeks in range(52):
+                currentWeekDay = 0
+                for weekDay in answer[3]:
+                    # If they do it on the weekday
+                    if weekDay == 1:
+                        localUser.getCalendar()[weeks].getDays()[currentWeekDay].getEvents().append(Event(answer[0],answer[2]))
+                currentWeekDay = currentWeekDay + 1
+
     show_frame(frame_questionnaire_done)
     label_top_q = Label(frame_questionnaire_done, text="Questionnaire").grid(row=0,column=0, columnspan=10)
     Label(frame_questionnaire_done).grid(row=1,column=0)
