@@ -7,20 +7,16 @@ import subprocess
 #For time
 import datetime
 from datetime import date
-localUser = User([],None)
+#for API requests
+import requests
+#for calculating coordinates
+import math
+google_api_key = 'AIzaSyDdOaN1K1GMwjxLv_x3EScqzWnJvyS-XTc'
+openweathermap_api_key = 'b59487c37a2da0337444936e64b3cac9'
+localUser = User([],None,None,None,None)
 weekdays = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
 
 
-def formatTime(eventTime):
-    printTime = (localUser.getTime().hour,localUser.getTime().minute)
-    if eventTime > localUser.getTime().minute:
-        printTime = (printTime[0]-1,printTime[1]-eventTime+60)
-    else:
-        printTime = (printTime[0],printTime[1] - eventTime)
-    if printTime[1] < 10:
-        return str(printTime[0]) + ":0" + str(printTime[1])
-    else:
-        return str(printTime[0]) + ":" + str(printTime[1])
 
 def settings():
     userInput = 1
@@ -112,23 +108,33 @@ def addEvent():
                         counter = counter + 1
         dummy = input(("Recurring event successfully created! Press enter to return"))
 
-def calculateTime(event):
-    if not event.getTravel():
-        return event.getTime()
+def formatTime(eventTime,offset):
+    offsetTotal = eventTime + offset
+    printTime = (localUser.getTime().hour,localUser.getTime().minute)
+    if offsetTotal > localUser.getTime().minute:
+        # Check if loop around midnight
+        if printTime[0] > 0:
+            hourOffset = (offsetTotal//60) + 1
+            printTime = (printTime[0] - hourOffset, printTime[1] - offsetTotal + (60 * hourOffset))
+        else:
+            printTime = (23,printTime[1] - offsetTotal + 60)
     else:
-        #--------------------------------------------------------------
-        #Insert fancy math to adjust travel time according to wind here
-        #--------------------------------------------------------------
-        return event.getTime()
+        printTime = (printTime[0],printTime[1] - offsetTotal)
+    
+    #Add zero for single digit minutes.
+    if printTime[1] < 10:
+        return str(printTime[0]) + ":0" + str(printTime[1])
+    else:
+        return str(printTime[0]) + ":" + str(printTime[1])
 
 def dayCalendar(weekNum,weekDayNum):
     print("Showing routine for " + weekdays[weekDayNum-1] + " in week " + str(weekNum) + "\n")
+
     offset = 0
-    for event in localUser.getCalendar()[weekNum-1].getDays()[weekDayNum-1].getEvents():
-        offset = offset + calculateTime(event)
-    for event in localUser.getCalendar()[weekNum-1].getDays()[weekDayNum-1].getEvents():
-        print(formatTime(offset) + "   " + event.getTitle())
-        offset = offset - calculateTime(event)
+    for event in reversed(localUser.getCalendar()[weekNum-1].getDays()[weekDayNum-1].getEvents()):
+        print(formatTime(event.getTime(),offset) + "   " + event.getTitle())
+        offset = offset + event.getTime()
+    
     dummy = input("\nTo go back to the menu press enter.\n")
 
 def weekCalendar(weekNum):
@@ -154,14 +160,103 @@ def yearCalendar():
                 if int(userInput) == weekNum + 1:
                     weekCalendar(weekNum)
 
-def main():
+def calculateWind(workTime,weatherCall,latHome,lngHome,latWork,lngWork):
+    # Calculate the angle in radians
+    travelAngle = math.atan2(lngWork - lngHome, latWork - latHome)
+    # Convert the angle from radians to degrees
+    # angle_in_degrees = math.degrees(travelAngle)
 
+
+    # Extract wind.speed and wind.deg
+    weatherSpeed = weatherCall['wind']['speed']
+    weatherDeg = weatherCall['wind']['deg']
+    if weatherDeg > 180:
+        weatherDeg = weatherDeg-360
+    
+    # Convert the angle to radians
+    angle1_rad = weatherDeg * (math.pi / 180)
+    # Calculate the difference in radians
+    diff_rad = abs(angle1_rad - travelAngle)
+
+    if diff_rad > math.pi:
+        diff_rad = 2 * math.pi - diff_rad
+
+    # Convert the difference back to degrees
+    distance = diff_rad * (180 / math.pi)
+
+    windScale = ((((distance-90)*-1)*(1/9))/1000)
+    boost = (weatherSpeed*windScale)+1
+    return int(workTime/boost)+1
+
+def getTimeToWork(weatherCall,latHome,lngHome,latWork,lngWork):
+    url = "https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&"
+    r = requests.get(url + "origins=" + localUser.getHomeAddress() + "&destinations=" + localUser.getWorkAddress() + "&mode=" + localUser.getTransportType() + "&key=" + google_api_key)
+    timeWork = r.json()["rows"][0]["elements"][0]["duration"]["text"]
+    return calculateWind(int(timeWork.split()[0]),weatherCall,latHome,lngHome,latWork,lngWork)
+
+def sunIsUp(weatherCall,timeToWork):
+    sunrise = datetime.datetime.fromtimestamp(weatherCall['sys']['sunrise'])
+    if localUser.getTime().minute > timeToWork:
+        goFromHomeMinute = localUser.getTime().minute - timeToWork
+        goFromHomeHour = localUser.getTime().hour
+    else:
+        goFromHomeMinute = localUser.getTime().minute - timeToWork + 60
+        goFromHomeHour = localUser.getTime().hour - 1
+    if goFromHomeHour < 10:
+        goFromHomeHourStr = "0"+str(goFromHomeHour)
+    else:
+        goFromHomeHourStr = str(goFromHomeHour)
+    if goFromHomeMinute < 10:
+        goFromHomeMinuteStr = "0"+str(goFromHomeMinute)
+    else:
+        goFromHomeMinuteStr = str(goFromHomeMinute)
+    
+    goFromHomeTime = datetime.time.fromisoformat(goFromHomeHourStr +":"+ goFromHomeMinuteStr +":0"+ str(localUser.getTime().second))
+    return sunrise.time() >= goFromHomeTime
+
+def isRaining(weatherCall):
+    weatherCode = weatherCall["weather"][0]["id"]
+    if weatherCode < 700:
+        return True
+
+
+def main():
+    # API REQUESTS
+    geoHome = requests.get("https://maps.googleapis.com/maps/api/geocode/json?address=" + localUser.getHomeAddress() + "&key=" + google_api_key)
+    geoWork = requests.get("https://maps.googleapis.com/maps/api/geocode/json?address=" + localUser.getWorkAddress() + "&key=" + google_api_key)
+    # Coordinates of users home
+    latHome = geoHome.json()["results"][0]["geometry"]["location"]["lat"]
+    lngHome = geoHome.json()["results"][0]["geometry"]["location"]["lng"]
+    # Coordinates of users workplace/school
+    latWork = geoWork.json()["results"][0]["geometry"]["location"]["lat"]
+    lngWork = geoWork.json()["results"][0]["geometry"]["location"]["lng"]
+    weatherData = requests.get("https://api.openweathermap.org/data/2.5/weather?lat=" + str(latWork) + "&lon=" + str(lngWork) + "&appid=" + openweathermap_api_key)
+    weatherCall = weatherData.json()
     # Pull todays date
+    todayWeek = date.today().isocalendar().week
+    todayWeekday = date.today().isocalendar().weekday
+    timeToWork = getTimeToWork(weatherCall,latHome,lngHome,latWork,lngWork)
+
     # If raining, insert an event with get rainjacket to todays routine.
+    if isRaining(weatherCall):
+        print("Its Raining today!")
+        localUser.getCalendar()[todayWeek-1].getDays()[todayWeekday-1].getEvents().append(Event("Get raincoat.",2))
+
     # If dark, insert an event with get bikelights to todays routine.
+    if sunIsUp(weatherCall,timeToWork) and localUser.getTransportType() == "bicycling":
+        print("Sun is not up yet!")
+        localUser.getCalendar()[todayWeek-1].getDays()[todayWeekday-1].getEvents().append(Event("Grab bikelights and put on your bike.",2))
+
+    # Add the "go to work/school" event to todays calendar
+    localUser.getCalendar()[todayWeek-1].getDays()[todayWeekday-1].getEvents().append(Event("Go to work/school",timeToWork))
 
     userInput = 1
     while userInput > 0 and userInput < 5:
+        # if case for changing date if date changes while using program.
+        if date.today().isocalendar().weekday != todayWeekday or date.today().isocalendar().week != todayWeek:
+            todayWeek = date.today().isocalendar().week
+            todayWeekday = date.today().isocalendar().weekday
+            localUser.getCalendar()[todayWeek-1].getDays()[todayWeekday-1].getEvents().append(Event("Go to work/school",getTimeToWork(),True))
         print("This is the main menu, you can by pressing the corresponding number:\n")
         print(" 1 - View your morning routine today\n")
         print(" 2 - View your week calendar\n")
@@ -170,7 +265,7 @@ def main():
         print(" 5 - Close Morning Butler\n")
         userInput = int(input())
         if userInput == 1:
-            dayCalendar(date.today().isocalendar().week,date.today().isocalendar().weekday)
+            dayCalendar(todayWeek,todayWeekday)
         if userInput == 2:
             yearCalendar()
         if userInput == 3:
@@ -181,6 +276,22 @@ def main():
 
 def questionnaire():
     print("\nPlease fill out the questionnaire.\n")
+
+    home = "Stationsvænget 2, 5260 Odense"#input("Enter your home address, eg. Exampleroad 1, 9999 Exampletown:\n")
+    work = "Campusvej 55, 5230 Odense"#input("Enter a work/school address, eg. Exampleroad 1, 9999 Exampletown:\n")
+    localUser.setHomeAddress(home)
+    localUser.setWorkAddress(work)
+    transportType = input("How do you go to work/school?\n Please enter a transport number.\n1: Car\n2: Public Transport\n3: Walking\n4: Bike\n")
+    if transportType == "1":
+        localUser.setTransportType("driving")
+    if transportType == "2":
+        localUser.setTransportType("transit")
+    if transportType == "3":
+        localUser.setTransportType("walking")
+    if transportType == "4":
+        localUser.setTransportType("bicycling")
+
+
     brushTeeth = "y" #input("Do you brush teeth, y/n?:")
     if brushTeeth == "y":
         timeBt = 4 #int(input("How long does it take to brush teeth in whole minutes?:"))
@@ -198,9 +309,8 @@ def questionnaire():
     howManyWeeks = 52 #int(input("How many weeks do you want to set up for?: "))
 
     goToWork = "09:00:00"#input("When do meet for work/school?: please follow the format XX:XX:XX:\n")
-    timeWork = 15#int(input("How long does it usually take to go to work/school in minutes?: "))
     localUser.setTime(datetime.time.fromisoformat(goToWork))
-
+    
     # make every week
     for weeks in range(howManyWeeks):
         localUser.getCalendar().append(Week("Week " + str(weeks+1),[]))
@@ -213,7 +323,6 @@ def questionnaire():
             if eatBreakfast == "y":
                 if bfList[day] == "y":
                     localUser.getCalendar()[weeks].getDays()[day].getEvents().append(Event("Breakfast",timeBf))
-            localUser.getCalendar()[weeks].getDays()[day].getEvents().append(Event("Go to work/school",timeWork,True))
     
     addAnother = input("Would you like to add extra events? y/n\n")
     while addAnother != "n":
@@ -222,4 +331,3 @@ def questionnaire():
     main()
 
 questionnaire()
-

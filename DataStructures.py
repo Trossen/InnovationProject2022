@@ -5,7 +5,6 @@ from datetime import time
 class Event:
     title: str
     time: int
-    travel : bool = False
 
     # GETTERS
     def getTitle(self):
@@ -13,9 +12,6 @@ class Event:
 
     def getTime(self):
         return self.time
-
-    def getTravel(self):
-        return self.travel
 
     # SETTERS
     def setTitle(self,title):
@@ -57,15 +53,38 @@ class Week:
 class User:
     userCalendar: List[Week]
     goToWorkTime: time
+    transportType: str
+    homeAddress: str
+    workAddress: str
 
+    #GETTERS
     def getCalendar(self):
         return self.userCalendar
     
     def getTime(self):
         return self.goToWorkTime
+    
+    def getTransportType(self):
+        return self.transportType
+    
+    def getHomeAddress(self):
+        return self.homeAddress
+    
+    def getWorkAddress(self):
+        return self.workAddress
 
+    #SETTERS
     def setCalendar(self,userCalendar):
         self.userCalendar = userCalendar
     
     def setTime(self, goToWorkTime):
         self.goToWorkTime = goToWorkTime
+    
+    def setTransportType(self, transportType):
+        self.transportType = transportType
+    
+    def setHomeAddress(self, homeAddress):
+        self.homeAddress = homeAddress
+
+    def setWorkAddress(self, workAddress):
+        self.workAddress = workAddress
