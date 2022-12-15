@@ -4,12 +4,12 @@ import math
 google_api_key = 'AIzaSyDdOaN1K1GMwjxLv_x3EScqzWnJvyS-XTc'
 openweathermap_api_key = 'b59487c37a2da0337444936e64b3cac9'
 # home address input
-home = input("Enter a home address\n") 
-#home = 'Stationsvænget 2, 5260 Odense'
+#home = input("Enter a home address\n") 
+home = 'Stationsvænget 2, 5260 Odense'
 
 # work address input
-work = input("Enter a work address\n") 
-#work = 'Campusvej 55, 5230 Odense'
+#work = input("Enter a work address\n") 
+work = 'Campusvej 55, 5230 Odense'
 
 #Transport
 transportnr = input("Enter a transport number.\n1: Car\n2: Public Transport\n3: Walking\n4: Bike\n")
@@ -122,4 +122,28 @@ sunset = datetime.datetime.fromtimestamp(data['sys']['sunset'])
 print('Sunrise:', sunrise)
 print('Sunset:', sunset)
 
-#Mulgivis vind hastighed udregning ting
+#vind hastighed udregning ting
+#Converter scalen vi får fra distance som går fra 0-180, hvor 0-45 er medvind, 45-135 er sidevind og 135-180 er modvind
+#Så at 90 er medvind, 0 er sidevind og -90 er modvind. Derefter gang tallet med (1/9) for at få dem til at være 100, 0 og -100, nemmere med procent regning
+windScale = ((((distance-90)*-1)*(1/9))/1000)
+print(windScale)
+boost = (weatherSpeed*windScale)+1
+print(boost)
+
+print("medvind")
+windScale = ((((0-90)*-1)*(1/9))/1000)
+print(windScale)
+boost = (weatherSpeed*windScale)+1
+print(boost)
+
+print("modvind")
+windScale = ((((180-90)*-1)*(1/9))/1000)
+print(windScale)
+boost = (weatherSpeed*windScale)+1
+print(boost)
+
+print("sidevind")
+windScale = ((((90-90)*-1)*(1/9))/1000)
+print(windScale)
+boost = (weatherSpeed*windScale)+1
+print(boost)
