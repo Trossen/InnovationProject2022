@@ -1,6 +1,7 @@
 from tkinter import *
 #Self written datastructures
 from DataStructures import *
+from main import *
 #For retaking the questionnaire
 import os 
 import sys 
@@ -72,7 +73,7 @@ Button(frame_bottom, text="Settings",height=3, width=9,
         ).grid(row='100',column='0', sticky='w')
 # Menu button
 Button(frame_bottom, text="Weekview",height=3, width=9,
-        command=lambda:open_weeks(50)
+        command=lambda:open_weeks(date.today().isocalendar().week)
         ).grid(row='100',column='1')
 # Add Event button
 Button(frame_bottom, text="+",height=3, width=9,
@@ -183,6 +184,26 @@ def open_tasks():
 
     # Buttons:
     # Kan laves som loop for ukendt antal, ellers bare stik to hardcode, måske med 7?
+    eventText = []
+    eventTime = []
+    timeIndex = 0
+    for event in localUser.getCalendar().getWeeks()[week-1].getDays[allDays.index(day)].getEvents():
+        eventText.append(event.getTitle())
+        if timeIndex == 0:
+            eventTime.append(event.getTime())
+        else:
+            eventTime.append(event.getTime() + eventTime[timeIndex-1])
+        timeIndex = timeIndex + 1
+    eventTimeStrings = []
+    offsetIndex = -1
+    for event in localUser.getCalendar()[week-1].getDays()[allDays.index(day)].getEvents():
+        if offsetIndex == -1:
+            eventTimeStrings.append(formatTime(event.getTime(),0,localUser))
+        else:
+            eventTimeStrings.append(formatTime(event.getTime(),eventTime[offsetIndex],localUser))
+        offsetIndex = offsetIndex + 1
+
+    
     btn1 = Button(frame_tasks, text=allDays[0],height=3, width=30).grid(row='1',column='1', pady=8, padx=20)
     btn2 = Button(frame_tasks, text=allDays[1],height=3, width=30).grid(row='2',column='1', padx=20)
     btn3 = Button(frame_tasks, text=allDays[2],height=3, width=30).grid(row='3',column='1', pady=8, padx=20)

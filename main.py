@@ -108,10 +108,10 @@ def addEvent():
                         counter = counter + 1
         dummy = input(("Recurring event successfully created! Press enter to return"))
 
-def formatTime(eventTime,offset):
+def formatTime(eventTime,offset,curUser):
     offsetTotal = eventTime + offset
-    printTime = (localUser.getTime().hour,localUser.getTime().minute)
-    if offsetTotal > localUser.getTime().minute:
+    printTime = (curUser.getTime().hour,curUser.getTime().minute)
+    if offsetTotal > curUser.getTime().minute:
         # Check if loop around midnight
         if printTime[0] > 0:
             hourOffset = (offsetTotal//60) + 1
@@ -132,7 +132,7 @@ def dayCalendar(weekNum,weekDayNum):
 
     offset = 0
     for event in reversed(localUser.getCalendar()[weekNum-1].getDays()[weekDayNum-1].getEvents()):
-        print(formatTime(event.getTime(),offset) + "   " + event.getTitle())
+        print(formatTime(event.getTime(),offset,localUser) + "   " + event.getTitle())
         offset = offset + event.getTime()
     
     dummy = input("\nTo go back to the menu press enter.\n")
