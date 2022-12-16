@@ -107,7 +107,7 @@ Button(frame_bottom, text="+",height=3, width=9,
 def open_home():
     show_frame(frame_home)
     open_topframe("Home")
-    open_tasks(date.today().isocalendar().week, date.today().isocalendar().weekday - 1)
+    open_tasks(date.today().isocalendar().week, date.today().isocalendar().weekday - 1,True)
 
 ################################################################################
 ############################## FRAME: WEEKS ####################################
@@ -147,15 +147,15 @@ def open_days(week):
     # Buttons:
     # Kan laves som loop for ukendt antal, ellers bare stik to hardcode, måske med 7?
     btn1 = Button(frame_days, text=allDays[0], height=3, width=30,
-                    command=lambda:open_tasks(week, allDays[0])).grid(row='1',column='1', pady=8, padx=20)
+                    command=lambda:open_tasks(week, 0)).grid(row='1',column='1', pady=8, padx=20)
     btn2 = Button(frame_days, text=allDays[1], height=3, width=30,
-                    command=lambda:open_tasks(week, allDays[1])).grid(row='2',column='1', padx=20)
+                    command=lambda:open_tasks(week, 1)).grid(row='2',column='1', padx=20)
     btn3 = Button(frame_days, text=allDays[2], height=3, width=30,
-                    command=lambda:open_tasks(week, allDays[2])).grid(row='3',column='1', pady=8, padx=20)
+                    command=lambda:open_tasks(week, 2)).grid(row='3',column='1', pady=8, padx=20)
     btn4 = Button(frame_days, text=allDays[3], height=3, width=30,
-                    command=lambda:open_tasks(week, allDays[3])).grid(row='4',column='1', padx=20)
+                    command=lambda:open_tasks(week, 3)).grid(row='4',column='1', padx=20)
     btn5 = Button(frame_days, text=allDays[4], height=3, width=30,
-                    command=lambda:open_tasks(week, allDays[4])).grid(row='5',column='1', pady=8, padx=20)
+                    command=lambda:open_tasks(week, 4)).grid(row='5',column='1', pady=8, padx=20)
 
     # Bottom buttons:
     # bottom_buttons(frame_days)
@@ -163,7 +163,7 @@ def open_days(week):
 ################################################################################
 ############################### FRAME: TASKS ####################################
 ################################################################################
-def open_tasks(week, day):
+def open_tasks(week, day, isToday = False):
     show_frame(frame_tasks)
 
     label1 = Label(frame_tasks, text="Week: " + str(week) + ", " + str(day)).grid(row='0',column='1')
@@ -181,10 +181,15 @@ def open_tasks(week, day):
         # Kan laves som loop for ukendt antal, ellers bare stik to hardcode, måske med 7?
         print("qAnswers:")
         print(qAnswers)
-
         eventText = []
         eventTime = []  
         timeIndex = 0
+        if isToday:
+            apiInfo = apiRequests(localUser)
+            todayTime = getTimeToWork(apiInfo[0],apiInfo[1],apiInfo[2],apiInfo[3],apiInfo[4],localUser)
+            localUser.getCalendar()[week-1].getDays()[day].insertEvent(0,Event("go to work/school",todayTime))
+        #Add alarm
+        localUser.getCalendar()[week-1].getDays()[day].getEvents().append(Event("Alarm/get up",5))
         for event in localUser.getCalendar()[week-1].getDays()[day].getEvents():
             print("Found an event")
             eventText.append(event.getTitle())
@@ -201,6 +206,13 @@ def open_tasks(week, day):
             else:
                 eventTimeStrings.append(formatTime(event.getTime(),eventTime[offsetIndex],localUser))
             offsetIndex = offsetIndex + 1
+        if isToday:
+            del localUser.getCalendar()[week-1].getDays()[day].getEvents()[0]
+        #delete alarm
+        eventListLength = len(localUser.getCalendar()[week-1].getDays()[day].getEvents())
+        del localUser.getCalendar()[week-1].getDays()[day].getEvents()[eventListLength-1]
+        eventText.reverse()
+        eventTimeStrings.reverse()
         print("EventText:")
         print(eventText)
         print("EventTime:")
@@ -209,9 +221,9 @@ def open_tasks(week, day):
         print(eventTimeStrings)
 
         btn1 = Label(frame_tasks, text=eventTimeStrings[0] + "     " + eventText[0],height=2, width=30,anchor='w',relief=GROOVE).grid(row='1',column='1', pady=8, padx=20)
-        # btn2 = Label(frame_tasks, text=eventTimeStrings[1] + "     " + eventText[1],height=2, width=30,anchor='w',relief=GROOVE).grid(row='2',column='1', padx=20)
-        # btn3 = Label(frame_tasks, text=eventTimeStrings[2] + "     " + eventText[2],height=2, width=30,anchor='w',relief=GROOVE).grid(row='3',column='1', pady=8, padx=20)
-        # btn4 = Label(frame_tasks, text=eventTimeStrings[3] + "     " + eventText[3],height=2, width=30,anchor='w',relief=GROOVE).grid(row='4',column='1', padx=20)
+        btn2 = Label(frame_tasks, text=eventTimeStrings[1] + "     " + eventText[1],height=2, width=30,anchor='w',relief=GROOVE).grid(row='2',column='1', padx=20)
+        btn3 = Label(frame_tasks, text=eventTimeStrings[2] + "     " + eventText[2],height=2, width=30,anchor='w',relief=GROOVE).grid(row='3',column='1', pady=8, padx=20)
+        btn4 = Label(frame_tasks, text=eventTimeStrings[3] + "     " + eventText[3],height=2, width=30,anchor='w',relief=GROOVE).grid(row='4',column='1', padx=20)
         # btn5 = Label(frame_tasks, text=eventTimeStrings[4] + "     " + eventText[4],height=2, width=30,anchor='w',relief=GROOVE).grid(row='5',column='1', pady=8, padx=20)
         # btn4 = Label(frame_tasks, text=eventTimeStrings[5] + "     " + eventText[5],height=2, width=30,anchor='w',relief=GROOVE).grid(row='6',column='1', padx=20)
         # btn5 = Label(frame_tasks, text=eventTimeStrings[6] + "     " + eventText[6],height=2, width=30,anchor='w',relief=GROOVE).grid(row='7',column='1', pady=8, padx=20)
@@ -309,8 +321,8 @@ def questionnaire(qList, currentQ):
     
     # Inner function to grab all the entered data, before next question is shown.
     def getVariables():
-        qAnswers[currentQ] = (listofEventTitles[currentQ], doingEvent.get(), getMinutes.get(
-                                ), [d1.get(),d2.get(),d3.get(),d4.get(),d5.get(),d6.get(),d7.get()])
+        qAnswers[currentQ] = (listofEventTitles[currentQ], doingEvent.get(), int(getMinutes.get(
+                                )), [d1.get(),d2.get(),d3.get(),d4.get(),d5.get(),d6.get(),d7.get()])
         questionnaire(qList,currentQ+1)
 
 ################################################################################
@@ -321,6 +333,12 @@ def questionnaireDone():
     doneQuestionnaire = True
     print(str(doneQuestionnaire))
 
+    #Enter user information
+    localUser.setHomeAddress(commuteList[0])
+    localUser.setWorkAddress(commuteList[1])
+    localUser.setTransportType(commuteList[2])
+    localUser.setTime(datetime.time.fromisoformat(commuteList[3]))
+
     #Make an empty calendar
     for weeks in range(52):
         localUser.getCalendar().append(Week("Week " + str(weeks+1),[]))
@@ -328,8 +346,8 @@ def questionnaireDone():
         for day in range(len(allDays)):
             localUser.getCalendar()[weeks].getDays().append(Day(allDays[day],[]))
     #Add events
+    counter = 0
     for answer in qAnswers:
-        counter = 0
         #If they are doing the event
         if answer[1]:
             for weeks in range(52):
@@ -337,12 +355,13 @@ def questionnaireDone():
                 for weekDay in answer[3]:
                     # If they do it on the weekday
                     if weekDay == 1:
-                        print("adding event")
-                        print(answer[0] + answer[2])
+                        #print("adding event "+str(currentWeekDay))
+                        #print(answer[0] + answer[2])
                         localUser.getCalendar()[weeks].getDays()[currentWeekDay].getEvents(
                             ).append(Event(listofEventTitles[counter],answer[2]))
-                currentWeekDay = currentWeekDay + 1
+                    currentWeekDay = currentWeekDay + 1
         counter = counter + 1
+    
 
     show_frame(frame_questionnaire_done)
     label_top_q = Label(frame_questionnaire_done, text="Questionnaire").grid(row=0,column=0, columnspan=10)
@@ -420,8 +439,8 @@ def open_addevent():
     button_add = Button(frame_addevent, text="Add event", command=lambda:getVariables()).grid(row=12, column=0, columnspan=10, sticky='e')
 
     def getVariables():
-        listOfAddEvents.append((getTitle.get(), getMinutes.get(), [d1.get(),d2.get(),d3.get(),d4.get(),d5.get(),d6.get(),d7.get()],
-                                    repeat.get(), getRepeatNr.get()))
+        listOfAddEvents.append((getTitle.get(), int(getMinutes.get()), [d1.get(),d2.get(),d3.get(),d4.get(),d5.get(),d6.get(),d7.get()],
+                                    repeat.get(), int(getRepeatNr.get())))
         open_home()
     
 def open_defaultQ():

@@ -52,7 +52,7 @@ class Week:
 @dataclass
 class User:
     userCalendar: List[Week]
-    goToWorkTime: time
+    goToWorkTime: time #deprecated
     transportType: str
     homeAddress: str
     workAddress: str

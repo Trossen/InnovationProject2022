@@ -188,9 +188,9 @@ def calculateWind(workTime,weatherCall,latHome,lngHome,latWork,lngWork):
     boost = (weatherSpeed*windScale)+1
     return int(workTime/boost)+1
 
-def getTimeToWork(weatherCall,latHome,lngHome,latWork,lngWork):
+def getTimeToWork(weatherCall,latHome,lngHome,latWork,lngWork,curUser):
     url = "https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&"
-    r = requests.get(url + "origins=" + localUser.getHomeAddress() + "&destinations=" + localUser.getWorkAddress() + "&mode=" + localUser.getTransportType() + "&key=" + google_api_key)
+    r = requests.get(url + "origins=" + curUser.getHomeAddress() + "&destinations=" + curUser.getWorkAddress() + "&mode=" + curUser.getTransportType() + "&key=" + google_api_key)
     timeWork = r.json()["rows"][0]["elements"][0]["duration"]["text"]
     return calculateWind(int(timeWork.split()[0]),weatherCall,latHome,lngHome,latWork,lngWork)
 
@@ -219,11 +219,10 @@ def isRaining(weatherCall):
     if weatherCode < 700:
         return True
 
-
-def main():
+def apiRequests(curUser):
     # API REQUESTS
-    geoHome = requests.get("https://maps.googleapis.com/maps/api/geocode/json?address=" + localUser.getHomeAddress() + "&key=" + google_api_key)
-    geoWork = requests.get("https://maps.googleapis.com/maps/api/geocode/json?address=" + localUser.getWorkAddress() + "&key=" + google_api_key)
+    geoHome = requests.get("https://maps.googleapis.com/maps/api/geocode/json?address=" + curUser.getHomeAddress() + "&key=" + google_api_key)
+    geoWork = requests.get("https://maps.googleapis.com/maps/api/geocode/json?address=" + curUser.getWorkAddress() + "&key=" + google_api_key)
     # Coordinates of users home
     latHome = geoHome.json()["results"][0]["geometry"]["location"]["lat"]
     lngHome = geoHome.json()["results"][0]["geometry"]["location"]["lng"]
@@ -232,18 +231,21 @@ def main():
     lngWork = geoWork.json()["results"][0]["geometry"]["location"]["lng"]
     weatherData = requests.get("https://api.openweathermap.org/data/2.5/weather?lat=" + str(latWork) + "&lon=" + str(lngWork) + "&appid=" + openweathermap_api_key)
     weatherCall = weatherData.json()
+    return (weatherCall,latHome,lngHome,latWork,lngWork)
+
+def main():
+    apiInfo = apiRequests()
     # Pull todays date
     todayWeek = date.today().isocalendar().week
     todayWeekday = date.today().isocalendar().weekday
-    timeToWork = getTimeToWork(weatherCall,latHome,lngHome,latWork,lngWork)
+    timeToWork = getTimeToWork(apiInfo[0],apiInfo[1],apiInfo[2],apiInfo[3],apiInfo[4])
 
     # If raining, insert an event with get rainjacket to todays routine.
-    if isRaining(weatherCall):
+    if isRaining(apiInfo[0]):
         print("Its Raining today!")
         localUser.getCalendar()[todayWeek-1].getDays()[todayWeekday-1].getEvents().append(Event("Get raincoat.",2))
-
     # If dark, insert an event with get bikelights to todays routine.
-    if sunIsUp(weatherCall,timeToWork) and localUser.getTransportType() == "bicycling":
+    if sunIsUp(apiInfo[0],timeToWork) and localUser.getTransportType() == "bicycling":
         print("Sun is not up yet!")
         localUser.getCalendar()[todayWeek-1].getDays()[todayWeekday-1].getEvents().append(Event("Grab bikelights and put on your bike.",2))
 
@@ -330,4 +332,4 @@ def questionnaire():
         addAnother = input("Would you like to add extra events? y/n\n")
     main()
 
-# questionnaire()
+#questionnaire()
