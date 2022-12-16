@@ -72,7 +72,7 @@ Button(frame_bottom, text="Settings",height=3, width=9,
         ).grid(row='100',column='0', sticky='w')
 # Menu button
 Button(frame_bottom, text="Weekview",height=3, width=9,
-        command=lambda:open_weeks(50)
+        command=lambda:open_weeks(date.today().isocalendar().week)
         ).grid(row='100',column='1')
 # Add Event button
 Button(frame_bottom, text="+",height=3, width=9,
@@ -105,26 +105,7 @@ Button(frame_bottom, text="+",height=3, width=9,
 def open_home():
     show_frame(frame_home)
     open_topframe("Home")
-    
-    # Frame Title:
-    label1 = Label(frame_home, text="Dato, Week, Tidspunkt").grid(row='0',column='1')
-
-    # Buttons:
-    # Kan laves som loop for ukendt antal, ellers bare stik to hardcode, måske med 7?
-    btn1 = Label(frame_home, text="Dø",height=2, width=30,relief=GROOVE).grid(row='1',column='1', pady=8, padx=20)
-    btn2 = Label(frame_home, text="genopstå",height=2, width=30,relief=GROOVE).grid(row='2',column='1', padx=20)
-    btn3 = Label(frame_home, text="dø version 2",height=2, width=30,relief=GROOVE).grid(row='3',column='1', pady=8, padx=20)
-    btn4 = Label(frame_home, text="Børst tænder",height=2, width=30,relief=GROOVE).grid(row='4',column='1', padx=20)
-    btn5 = Label(frame_home, text="Rid på job",height=2, width=30,relief=GROOVE).grid(row='5',column='1', pady=8, padx=20)
-    # btn5 = Label(frame_home, text="Rid på job",height=2, width=30,relief=GROOVE).grid(row='6',column='1', pady=8, padx=20)
-    # btn5 = Label(frame_home, text="Rid på job",height=2, width=30,relief=GROOVE).grid(row='7',column='1', pady=8, padx=20)
-    # btn5 = Label(frame_home, text="Rid på job",height=2, width=30,relief=GROOVE).grid(row='8',column='1', pady=8, padx=20)
-    # btn5 = Label(frame_home, text="Rid på job",height=2, width=30,relief=GROOVE).grid(row='9',column='1', pady=8, padx=20)
-    # btn5 = Label(frame_home, text="Rid på job",height=2, width=30,relief=GROOVE).grid(row='10',column='1', pady=8, padx=20)
-
-
-    # Bottom buttons:
-    # bottom_buttons(frame_home)
+    open_tasks(date.today().isocalendar().week, allDays[date.today().isocalendar().weekday - 1])
 
 ################################################################################
 ############################## FRAME: WEEKS ####################################
@@ -139,7 +120,7 @@ def open_weeks(week):
             return str(i)
 
     # Frame Title:
-    label1 = Label(frame_weeks, text="Week overview").grid(row='0',column='1')
+    label1 = Label(frame_weeks, text="Week overview").grid(row=0,column=1)
 
     # Buttons:
     # Kan laves som loop for ukendt antal, ellers bare stik to hardcode, måske med 7?
@@ -163,11 +144,16 @@ def open_days(week):
 
     # Buttons:
     # Kan laves som loop for ukendt antal, ellers bare stik to hardcode, måske med 7?
-    btn1 = Button(frame_days, text=allDays[0],height=3, width=30).grid(row='1',column='1', pady=8, padx=20)
-    btn2 = Button(frame_days, text=allDays[1],height=3, width=30).grid(row='2',column='1', padx=20)
-    btn3 = Button(frame_days, text=allDays[2],height=3, width=30).grid(row='3',column='1', pady=8, padx=20)
-    btn4 = Button(frame_days, text=allDays[3],height=3, width=30).grid(row='4',column='1', padx=20)
-    btn5 = Button(frame_days, text=allDays[4],height=3, width=30).grid(row='5',column='1', pady=8, padx=20)
+    btn1 = Button(frame_days, text=allDays[0], height=3, width=30,
+                    command=lambda:open_tasks(week, allDays[0])).grid(row='1',column='1', pady=8, padx=20)
+    btn2 = Button(frame_days, text=allDays[1], height=3, width=30,
+                    command=lambda:open_tasks(week, allDays[1])).grid(row='2',column='1', padx=20)
+    btn3 = Button(frame_days, text=allDays[2], height=3, width=30,
+                    command=lambda:open_tasks(week, allDays[2])).grid(row='3',column='1', pady=8, padx=20)
+    btn4 = Button(frame_days, text=allDays[3], height=3, width=30,
+                    command=lambda:open_tasks(week, allDays[3])).grid(row='4',column='1', padx=20)
+    btn5 = Button(frame_days, text=allDays[4], height=3, width=30,
+                    command=lambda:open_tasks(week, allDays[4])).grid(row='5',column='1', pady=8, padx=20)
 
     # Bottom buttons:
     # bottom_buttons(frame_days)
@@ -175,22 +161,24 @@ def open_days(week):
 ################################################################################
 ############################### FRAME: TASKS ####################################
 ################################################################################
-def open_tasks():
+def open_tasks(week, day):
     show_frame(frame_tasks)
 
-    # Frame Title:
-    label1 = Label(frame_tasks, text="de").grid(row='0',column='1')
+    label1 = Label(frame_tasks, text="Week: " + str(week) + ", " + day).grid(row='0',column='1')
+    eventText = ["a","s","d","f","s","a","d","f"]
+    # for i in range(7):
+    #     eventText.append(localUser.getCalendar().getWeeks()[week-1].getDays[allDays.index(day)].getEvents()[i].getTitle())
 
+    eventTime = ["1","2","3","4","5","6","7"]
     # Buttons:
     # Kan laves som loop for ukendt antal, ellers bare stik to hardcode, måske med 7?
-    btn1 = Button(frame_tasks, text=allDays[0],height=3, width=30).grid(row='1',column='1', pady=8, padx=20)
-    btn2 = Button(frame_tasks, text=allDays[1],height=3, width=30).grid(row='2',column='1', padx=20)
-    btn3 = Button(frame_tasks, text=allDays[2],height=3, width=30).grid(row='3',column='1', pady=8, padx=20)
-    btn4 = Button(frame_tasks, text=allDays[3],height=3, width=30).grid(row='4',column='1', padx=20)
-    btn5 = Button(frame_tasks, text=allDays[4],height=3, width=30).grid(row='5',column='1', pady=8, padx=20)
-
-    # Bottom buttons:
-    # bottom_buttons(frame_tasks)
+    btn1 = Label(frame_tasks, text=eventTime[0] + "     " + eventText[0],height=2, width=30,anchor='w',relief=GROOVE).grid(row='1',column='1', pady=8, padx=20)
+    btn2 = Label(frame_tasks, text=eventTime[1] + "     " + eventText[1],height=2, width=30,anchor='w',relief=GROOVE).grid(row='2',column='1', padx=20)
+    btn3 = Label(frame_tasks, text=eventTime[2] + "     " + eventText[2],height=2, width=30,anchor='w',relief=GROOVE).grid(row='3',column='1', pady=8, padx=20)
+    btn4 = Label(frame_tasks, text=eventTime[3] + "     " + eventText[3],height=2, width=30,anchor='w',relief=GROOVE).grid(row='4',column='1', padx=20)
+    btn5 = Label(frame_tasks, text=eventTime[4] + "     " + eventText[4],height=2, width=30,anchor='w',relief=GROOVE).grid(row='5',column='1', pady=8, padx=20)
+    btn4 = Label(frame_tasks, text=eventTime[5] + "     " + eventText[5],height=2, width=30,anchor='w',relief=GROOVE).grid(row='6',column='1', padx=20)
+    btn5 = Label(frame_tasks, text=eventTime[6] + "     " + eventText[6],height=2, width=30,anchor='w',relief=GROOVE).grid(row='7',column='1', pady=8, padx=20)
 
 ##### ???????????????????????????????? Skal laves om til tasks overview
 def open_frame(curFrame, frameTitle, listOfStr):
