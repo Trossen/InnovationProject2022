@@ -1,6 +1,7 @@
 from tkinter import *
 #Self written datastructures
 from DataStructures import *
+from main import *
 #For retaking the questionnaire
 import os 
 import sys 
@@ -179,6 +180,34 @@ def open_tasks(week, day):
     btn5 = Label(frame_tasks, text=eventTime[4] + "     " + eventText[4],height=2, width=30,anchor='w',relief=GROOVE).grid(row='5',column='1', pady=8, padx=20)
     btn4 = Label(frame_tasks, text=eventTime[5] + "     " + eventText[5],height=2, width=30,anchor='w',relief=GROOVE).grid(row='6',column='1', padx=20)
     btn5 = Label(frame_tasks, text=eventTime[6] + "     " + eventText[6],height=2, width=30,anchor='w',relief=GROOVE).grid(row='7',column='1', pady=8, padx=20)
+    eventText = []
+    eventTime = []  
+    timeIndex = 0
+    for event in localUser.getCalendar().getWeeks()[week-1].getDays[allDays.index(day)].getEvents():
+        eventText.append(event.getTitle())
+        if timeIndex == 0:
+            eventTime.append(event.getTime())
+        else:
+            eventTime.append(event.getTime() + eventTime[timeIndex-1])
+        timeIndex = timeIndex + 1
+    eventTimeStrings = []
+    offsetIndex = -1
+    for event in localUser.getCalendar()[week-1].getDays()[allDays.index(day)].getEvents():
+        if offsetIndex == -1:
+            eventTimeStrings.append(formatTime(event.getTime(),0,localUser))
+        else:
+            eventTimeStrings.append(formatTime(event.getTime(),eventTime[offsetIndex],localUser))
+        offsetIndex = offsetIndex + 1
+
+    
+    btn1 = Button(frame_tasks, text=allDays[0],height=3, width=30).grid(row='1',column='1', pady=8, padx=20)
+    btn2 = Button(frame_tasks, text=allDays[1],height=3, width=30).grid(row='2',column='1', padx=20)
+    btn3 = Button(frame_tasks, text=allDays[2],height=3, width=30).grid(row='3',column='1', pady=8, padx=20)
+    btn4 = Button(frame_tasks, text=allDays[3],height=3, width=30).grid(row='4',column='1', padx=20)
+    btn5 = Button(frame_tasks, text=allDays[4],height=3, width=30).grid(row='5',column='1', pady=8, padx=20)
+
+    # Bottom buttons:
+    # bottom_buttons(frame_tasks)
 
 ##### ???????????????????????????????? Skal laves om til tasks overview
 def open_frame(curFrame, frameTitle, listOfStr):
