@@ -46,6 +46,7 @@ qAnswers = [() for i in listOfQ]
 # (Title :: str, Minutes :: Int, Weekdays :: [Int], Repeat :: Bool, RepeatNr :: Int)
 listOfAddEvents = []
 commuteList = [""] * 4
+doneQuestionnaire = False
 
 for frame in (frame_menu, frame_settings, frame_addevent, frame_questionnaire, frame_questionnaire_done,
                 frame_weeks, frame_days, frame_tasks, frame_home, frame_defaultQ):
@@ -106,7 +107,7 @@ Button(frame_bottom, text="+",height=3, width=9,
 def open_home():
     show_frame(frame_home)
     open_topframe("Home")
-    open_tasks(date.today().isocalendar().week, allDays[date.today().isocalendar().weekday - 1])
+    open_tasks(date.today().isocalendar().week, date.today().isocalendar().weekday - 1)
 
 ################################################################################
 ############################## FRAME: WEEKS ####################################
@@ -165,49 +166,58 @@ def open_days(week):
 def open_tasks(week, day):
     show_frame(frame_tasks)
 
-    label1 = Label(frame_tasks, text="Week: " + str(week) + ", " + day).grid(row='0',column='1')
-    eventText = ["a","s","d","f","s","a","d","f"]
-    # for i in range(7):
-    #     eventText.append(localUser.getCalendar().getWeeks()[week-1].getDays[allDays.index(day)].getEvents()[i].getTitle())
-
-    eventTime = ["1","2","3","4","5","6","7"]
-    # Buttons:
-    # Kan laves som loop for ukendt antal, ellers bare stik to hardcode, måske med 7?
-    btn1 = Label(frame_tasks, text=eventTime[0] + "     " + eventText[0],height=2, width=30,anchor='w',relief=GROOVE).grid(row='1',column='1', pady=8, padx=20)
-    btn2 = Label(frame_tasks, text=eventTime[1] + "     " + eventText[1],height=2, width=30,anchor='w',relief=GROOVE).grid(row='2',column='1', padx=20)
-    btn3 = Label(frame_tasks, text=eventTime[2] + "     " + eventText[2],height=2, width=30,anchor='w',relief=GROOVE).grid(row='3',column='1', pady=8, padx=20)
-    btn4 = Label(frame_tasks, text=eventTime[3] + "     " + eventText[3],height=2, width=30,anchor='w',relief=GROOVE).grid(row='4',column='1', padx=20)
-    btn5 = Label(frame_tasks, text=eventTime[4] + "     " + eventText[4],height=2, width=30,anchor='w',relief=GROOVE).grid(row='5',column='1', pady=8, padx=20)
-    btn4 = Label(frame_tasks, text=eventTime[5] + "     " + eventText[5],height=2, width=30,anchor='w',relief=GROOVE).grid(row='6',column='1', padx=20)
-    btn5 = Label(frame_tasks, text=eventTime[6] + "     " + eventText[6],height=2, width=30,anchor='w',relief=GROOVE).grid(row='7',column='1', pady=8, padx=20)
-    eventText = []
-    eventTime = []  
-    timeIndex = 0
-    for event in localUser.getCalendar().getWeeks()[week-1].getDays[allDays.index(day)].getEvents():
-        eventText.append(event.getTitle())
-        if timeIndex == 0:
-            eventTime.append(event.getTime())
-        else:
-            eventTime.append(event.getTime() + eventTime[timeIndex-1])
-        timeIndex = timeIndex + 1
-    eventTimeStrings = []
-    offsetIndex = -1
-    for event in localUser.getCalendar()[week-1].getDays()[allDays.index(day)].getEvents():
-        if offsetIndex == -1:
-            eventTimeStrings.append(formatTime(event.getTime(),0,localUser))
-        else:
-            eventTimeStrings.append(formatTime(event.getTime(),eventTime[offsetIndex],localUser))
-        offsetIndex = offsetIndex + 1
-
+    label1 = Label(frame_tasks, text="Week: " + str(week) + ", " + str(day)).grid(row='0',column='1')
     
-    btn1 = Button(frame_tasks, text=allDays[0],height=3, width=30).grid(row='1',column='1', pady=8, padx=20)
-    btn2 = Button(frame_tasks, text=allDays[1],height=3, width=30).grid(row='2',column='1', padx=20)
-    btn3 = Button(frame_tasks, text=allDays[2],height=3, width=30).grid(row='3',column='1', pady=8, padx=20)
-    btn4 = Button(frame_tasks, text=allDays[3],height=3, width=30).grid(row='4',column='1', padx=20)
-    btn5 = Button(frame_tasks, text=allDays[4],height=3, width=30).grid(row='5',column='1', pady=8, padx=20)
+    print("At open_tasks: " + "week: " + str(week) + " day: " + str(day) + " " + str(doneQuestionnaire))
 
-    # Bottom buttons:
-    # bottom_buttons(frame_tasks)
+    if doneQuestionnaire:
+        print("Inside if doneQuestionnaire")
+        # eventText = ["a","s","d","f","s","a","d","f"]
+        # for i in range(7):
+        #     eventText.append(localUser.getCalendar().getWeeks()[week-1].getDays[allDays.index(day)].getEvents()[i].getTitle())
+
+        # eventTime = ["1","2","3","4","5","6","7"]
+        # Buttons:
+        # Kan laves som loop for ukendt antal, ellers bare stik to hardcode, måske med 7?
+        print("qAnswers:")
+        print(qAnswers)
+
+        eventText = []
+        eventTime = []  
+        timeIndex = 0
+        for event in localUser.getCalendar()[week-1].getDays()[day].getEvents():
+            print("Found an event")
+            eventText.append(event.getTitle())
+            if timeIndex == 0:
+                eventTime.append(event.getTime())
+            else:
+                eventTime.append(event.getTime() + eventTime[timeIndex-1])
+            timeIndex = timeIndex + 1
+        eventTimeStrings = []
+        offsetIndex = -1
+        for event in localUser.getCalendar()[week-1].getDays()[day].getEvents():
+            if offsetIndex == -1:
+                eventTimeStrings.append(formatTime(event.getTime(),0,localUser))
+            else:
+                eventTimeStrings.append(formatTime(event.getTime(),eventTime[offsetIndex],localUser))
+            offsetIndex = offsetIndex + 1
+        print("EventText:")
+        print(eventText)
+        print("EventTime:")
+        print(eventTime)
+        print("EventTimeStrings:")
+        print(eventTimeStrings)
+
+        btn1 = Label(frame_tasks, text=eventTimeStrings[0] + "     " + eventText[0],height=2, width=30,anchor='w',relief=GROOVE).grid(row='1',column='1', pady=8, padx=20)
+        # btn2 = Label(frame_tasks, text=eventTimeStrings[1] + "     " + eventText[1],height=2, width=30,anchor='w',relief=GROOVE).grid(row='2',column='1', padx=20)
+        # btn3 = Label(frame_tasks, text=eventTimeStrings[2] + "     " + eventText[2],height=2, width=30,anchor='w',relief=GROOVE).grid(row='3',column='1', pady=8, padx=20)
+        # btn4 = Label(frame_tasks, text=eventTimeStrings[3] + "     " + eventText[3],height=2, width=30,anchor='w',relief=GROOVE).grid(row='4',column='1', padx=20)
+        # btn5 = Label(frame_tasks, text=eventTimeStrings[4] + "     " + eventText[4],height=2, width=30,anchor='w',relief=GROOVE).grid(row='5',column='1', pady=8, padx=20)
+        # btn4 = Label(frame_tasks, text=eventTimeStrings[5] + "     " + eventText[5],height=2, width=30,anchor='w',relief=GROOVE).grid(row='6',column='1', padx=20)
+        # btn5 = Label(frame_tasks, text=eventTimeStrings[6] + "     " + eventText[6],height=2, width=30,anchor='w',relief=GROOVE).grid(row='7',column='1', pady=8, padx=20)
+
+        # Bottom buttons:
+        # bottom_buttons(frame_tasks)
 
 ##### ???????????????????????????????? Skal laves om til tasks overview
 def open_frame(curFrame, frameTitle, listOfStr):
@@ -307,6 +317,10 @@ def questionnaire(qList, currentQ):
 ########################### FRAME: QUESTIONNAIRE DONE ##########################
 ################################################################################
 def questionnaireDone():
+    global doneQuestionnaire
+    doneQuestionnaire = True
+    print(str(doneQuestionnaire))
+
     #Make an empty calendar
     for weeks in range(52):
         localUser.getCalendar().append(Week("Week " + str(weeks+1),[]))
@@ -315,6 +329,7 @@ def questionnaireDone():
             localUser.getCalendar()[weeks].getDays().append(Day(allDays[day],[]))
     #Add events
     for answer in qAnswers:
+        counter = 0
         #If they are doing the event
         if answer[1]:
             for weeks in range(52):
@@ -322,8 +337,12 @@ def questionnaireDone():
                 for weekDay in answer[3]:
                     # If they do it on the weekday
                     if weekDay == 1:
-                        localUser.getCalendar()[weeks].getDays()[currentWeekDay].getEvents().append(Event(answer[0],answer[2]))
+                        print("adding event")
+                        print(answer[0] + answer[2])
+                        localUser.getCalendar()[weeks].getDays()[currentWeekDay].getEvents(
+                            ).append(Event(listofEventTitles[counter],answer[2]))
                 currentWeekDay = currentWeekDay + 1
+        counter = counter + 1
 
     show_frame(frame_questionnaire_done)
     label_top_q = Label(frame_questionnaire_done, text="Questionnaire").grid(row=0,column=0, columnspan=10)
