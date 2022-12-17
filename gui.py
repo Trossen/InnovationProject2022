@@ -139,7 +139,7 @@ def open_tasks(week, day, isToday = False):
         # Calculate travel time to work/school (only if the date is today), and add as event
         if isToday:
             apiInfo = apiRequests(localUser)
-            todayTime = getTimeToWork(apiInfo[0],apiInfo[1],apiInfo[2],apiInfo[3],apiInfo[4],localUser)
+            todayTime = calculateWind(apiInfo[0],apiInfo[1],apiInfo[2],apiInfo[3],apiInfo[4],apiInfo[5],apiInfo[6])
             localUser.getCalendar()[week-1].getDays()[day].insertEvent(0,Event("go to work/school",todayTime))
 
         # Add alarm

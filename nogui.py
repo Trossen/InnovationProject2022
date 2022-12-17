@@ -1,2 +1,2 @@
-from main import questionnaire
-questionnaire()
+from main import main
+main()
