@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 from datetime import time
+
 @dataclass
 class Event:
     title: str
@@ -37,7 +38,6 @@ class Day:
     def setEvents(self,events):
         self.events = events
 
-
 @dataclass
 class Week:
     name: str
@@ -52,7 +52,7 @@ class Week:
 @dataclass
 class User:
     userCalendar: List[Week]
-    goToWorkTime: time #deprecated
+    goToWorkTime: time
     transportType: str
     homeAddress: str
     workAddress: str

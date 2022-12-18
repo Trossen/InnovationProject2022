@@ -14,7 +14,6 @@ import math
 # List with weekdays.
 weekdays = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
 
-
 # Shows the settings menu, where the user wipe all events or retake the questionnaire.
 def settings(curUser):
     userInput = 1
@@ -212,7 +211,7 @@ def calculateWind(windSpeed,windAngle,latHome,lngHome,latWork,lngWork,workTime):
 
 # Returns true or false given a sunrise time, a work time and a user.
 # True if the sun is up when the user has to leave for work, False otherwise.
-def sunIsUp(sunrise,timeToWork,curUser):
+def sunIsUp(curUser,sunrise,timeToWork):
 
     # Subtract an hour if necessary
     if curUser.getTime().minute > timeToWork:
@@ -381,7 +380,7 @@ def main():
         localUser.getCalendar()[todayWeek-1].getDays()[todayWeekday-1].getEvents().append(Event("Get raincoat.",2))
 
     # If dark, insert an event with get bikelights to todays routine.
-    if sunIsUp(apiInfo[8],timeToWork,localUser) and localUser.getTransportType() == "bicycling":
+    if sunIsUp(localUser,apiInfo[8],timeToWork) and localUser.getTransportType() == "bicycling":
         localUser.getCalendar()[todayWeek-1].getDays()[todayWeekday-1].getEvents().append(Event("Grab bikelights and put on your bike.",2))
 
     # Add the "go to work/school" event to todays calendar
