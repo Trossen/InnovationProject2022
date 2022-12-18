@@ -7,3 +7,4 @@ To run the prototype app, either:
 
 Make sure you have all the other files in the same directory, and installed the appropriate
 python libraries.
+Also remember to enter you own API key to openWeather and Google API, in the method apiRequests in main.py.
