@@ -247,8 +247,8 @@ def isRaining(weatherCode):
 # Assumes non-garbage input in the user's address fields.
 def apiRequests(curUser):
     # API KEYS
-    google_api_key = 'AIzaSyDdOaN1K1GMwjxLv_x3EScqzWnJvyS-XTc'
-    openweathermap_api_key = 'b59487c37a2da0337444936e64b3cac9'
+    google_api_key = 'ENTER YOUR KEY HERE'
+    openweathermap_api_key = 'ENTER YOUR KEY HERE'
 
     # Request geolocation from Google API
     geoHomeData = requests.get("https://maps.googleapis.com/maps/api/geocode/json?address=" + curUser.getHomeAddress() + "&key=" + google_api_key)
